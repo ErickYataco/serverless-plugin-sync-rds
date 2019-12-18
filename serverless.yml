@@ -30,3 +30,13 @@ functions:
       - http:
           path: hello
           method: get
+
+# Create our resources with separate CloudFormation templates
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
+  # Cognito
+  - ${file(resources/cognito-identity-pool.yml)}
+  - ${file(resources/cognito-user-pool.yml)}
+  # RDS
+  - ${file(resources/rds-mysql.yml)}

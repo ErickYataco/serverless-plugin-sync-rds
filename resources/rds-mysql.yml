@@ -1,0 +1,51 @@
+Resources:
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "sg_sales_Lambda"
+      GroupDescription: " sg to conmect rds with lambda functions" 
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: ${self:custom.DB_PORT}
+        ToPort: ${self:custom.DB_PORT}
+        CidrIp: 0.0.0.0/0
+
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: "DB_subnet_sales"
+      DBSubnetGroupDescription: CloudFormation managed DB subnet group.
+      SubnetIds:
+        - ${self:custom.PUBLIC_SUBNET_ID_1}
+        - ${self:custom.PUBLIC_SUBNET_ID_2}
+        - ${self:custom.PUBLIC_SUBNET_ID_3}
+        - ${self:custom.PUBLIC_SUBNET_ID_4}
+
+  RDSsales:
+    Type: AWS::RDS::DBInstance
+    Properties: 
+      DBInstanceIdentifier: ${self:custom.DB_NAME}
+      DBName: ${self:custom.DB_NAME}
+      AllocatedStorage: '5'
+      DBInstanceClass: db.t2.micro
+      Engine: MySQL
+      EngineVersion: 5.7.26
+      MasterUsername: ${self:custom.DB_USER}
+      MasterUserPassword: ${self:custom.DB_PASSWORD}
+      Port: ${self:custom.DB_PORT}
+      #DBParameterGroupName: !Ref 'MyRDSParamGroup'
+      VPCSecurityGroups:
+        - Fn::GetAtt: [RDSSecurityGroup, GroupId]
+      DBSubnetGroupName: 
+        Ref: DatabaseSubnetGroup
+      PubliclyAccessible: true
+
+Outputs:
+  MySqlHost:
+    Value:
+      Fn::GetAtt: [RDSsales, Endpoint.Address]
+    Export:
+        Name: MySqlHost
+  RDSSecurityGroupId:
+    Value:    
+      Fn::GetAtt: [RDSSecurityGroup, GroupId]
