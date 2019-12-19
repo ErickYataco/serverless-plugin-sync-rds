@@ -14,7 +14,7 @@ plugins:
 You cant use this plugin in two scenarios:
 
   1) local machine: you need to set [aws_profile](serverless.yml#L12) custom variable 
-  2) Bastion Host: this machine must have iam role privilege and the value of custom variable deploy must be "bastion"
+  2) Bastion Host: this machine must have iam role privilege and the value of custom variable [deploy](serverless.yml#L13) must be "bastion"
 
 
 [serverless.yml](serverless.yml#L19-L20)
@@ -30,7 +30,7 @@ custom:
 
 In order to deploy this project you need to create in the root path a file .env and define the next values
 
-```javascript
+```
 DB_NAME             = Name of DB of RDS example gitfcard
 DB_USER             = User with admin privilege to RDS instance example admin
 DB_PASSWORD         = Password of admin user example admin564
