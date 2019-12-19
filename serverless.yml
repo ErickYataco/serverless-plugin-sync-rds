@@ -9,6 +9,19 @@ plugins:
   - serverless-bundle # Package our functions with Webpack
   - serverless-offline
   - serverless-dotenv-plugin # Load .env as environment variables
+  - deploy-scheme-rds # custom Sync RDS plugin
+
+custom:  
+  
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or fallsback to what we have set in the provider section.
+  stage:                ${opt:stage, self:provider.stage}
+  deploy:               ${opt:deploy, local} # values local or bastion
+  aws_profile:          ${opt:aws_profile, torus} # if your deploy is local set your aws_profile
+  PUBLIC_SUBNET_ID_1:   PUBLIC_SUBNET_ID_1
+  PUBLIC_SUBNET_ID_2:   PUBLIC_SUBNET_ID_2
+  PUBLIC_SUBNET_ID_3:   PUBLIC_SUBNET_ID_3
+
 
 provider:
   name: aws
@@ -20,8 +33,27 @@ provider:
   # the following line. Also, make sure to not
   # commit your .env.
   #
-  #environment:
-  #  sampleEnvVar: ${env:SAMPLE_ENV_VAR}
+  environment:
+    DB_NAME:      ${env.DB_NAME}-${self:custom.stage}
+    DB_USER:      ${env.DB_USER}
+    DB_PASSWORD:  ${env.DB_PASSWORD}
+    DB_PORT:      ${env.DB_PORT}
+    DB_HOST: 
+      Fn::GetAtt: [RDSGiftcard, Endpoint.Address]
+
+  vpc:
+    securityGroupIds:
+      - Fn::GetAtt: [RDSSecurityGroup, GroupId]
+    subnetIds:      
+      - PRIVATE_SUBNET_ID_1
+      - PRIVATE_SUBNET_ID_2
+      - PRIVATE_SUBNET_ID_3      
+  
+  iamRoleStatements:
+    - Effect: Allow
+      Action: "cognito-idp:*"
+      Resource: 
+        - Fn::GetAtt: [CognitoUserPool, Arn] 
 
 functions:
   hello:
@@ -39,4 +71,4 @@ resources:
   - ${file(resources/cognito-identity-pool.yml)}
   - ${file(resources/cognito-user-pool.yml)}
   # RDS
-  - ${file(resources/rds-mysql.yml)}
+  - ${file(resources/rds-mysql.yml)}v
