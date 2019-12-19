@@ -1,6 +1,23 @@
 # Serverless Plugin SYNC RDS
 
-You would found the code of the plugin [here](.serverless_plugins/deploy-scheme-rds.js#L7) who deploys the scheme of our DB.
+You would found the code of the plugin [here](.serverless_plugins/deploy-scheme-rds.js#L7) who sync the scheme of your DB and the end of your deploy.
+
+```javascript
+'use strict'
+
+const db = require('../src/models/index').sequelize
+const Seed = require('../src/seeds/index')
+const aws = require('aws-sdk');
+
+class DeploySchemeRDS {
+  constructor (serverless, options) {
+    this.hooks = {
+      // this is where we declare the hook we want our code to run
+      'after:deploy:finalize': function () { syncScheme(serverless,db,Seed) }
+    }
+  }
+} ...
+```
 
 [serverless.yml](serverless.yml#L12)
 ```yaml
